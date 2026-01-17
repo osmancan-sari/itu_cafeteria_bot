@@ -6,7 +6,7 @@ from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch_ros.actions import Node
 from launch.substitutions import Command, LaunchConfiguration 
 
-def generate_launch_dexscription():
+def generate_launch_description():
     pkg_cafeteria_sim = get_package_share_directory('cafeteria_simulation')
     pkg_gazebo_ros = get_package_share_directory('gazebo_ros')
     pkg_turtlebot3_gazebo = get_package_share_directory('turtlebot3_gazebo')

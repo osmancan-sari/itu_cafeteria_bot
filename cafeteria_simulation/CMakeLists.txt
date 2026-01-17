@@ -16,8 +16,6 @@ find_package(nav2_msgs REQUIRED)
 install(DIRECTORY
   launch
   worlds
-  models
-  config
   DESTINATION share/${PROJECT_NAME}
 )
 if(BUILD_TESTING)

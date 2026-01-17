@@ -1,0 +1,13 @@
+services:
+  ros-gazebo:
+    image: ros-gazebo:humble
+    container_name: itu_cafeteria_bot
+    network_mode: host
+    environment:
+      - DISPLAY=host.docker.internal:0.0
+      - LIBGL_ALWAYS_INDIRECT=0
+    volumes:
+      - .:/home/rosuser/itu_cafeteria_bot
+    stdin_open: true
+    tty: true
+    working_dir: /home/rosuser/itu_cafeteria_bot
