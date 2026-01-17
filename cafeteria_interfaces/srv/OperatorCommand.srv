@@ -1,0 +1,27 @@
+# OperatorCommand.srv
+# Service for operator to inject commands into the state machine
+# Server: Robot State Machine
+# Client: Operator UI / Control Panel
+
+# Request - What command the operator wants to execute
+# Command constants
+uint8 CMD_RESUME=0          # Resume operation after emergency stop
+uint8 CMD_ABORT=1           # Abort current mission, return to idle
+uint8 CMD_THEFT_CONFIRMED=2 # Confirm theft, trigger appropriate response
+uint8 CMD_FORCE_RETURN=3    # Force robot to return home immediately
+
+uint8 command
+
+# Optional message from operator
+string operator_message
+
+---
+
+# Response - Result of the command
+bool success
+
+# Human-readable result message
+string message
+
+# Current state after command
+uint8 new_state

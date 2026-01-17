@@ -1,0 +1,28 @@
+# StartDelivery.srv
+# Service to start a new delivery mission
+# Server: Robot State Machine
+# Client: Order management system
+
+# Request - Delivery destination
+# Table ID to deliver to
+int32 table_id
+
+# Optional: specific coordinates (if not using table_id)
+geometry_msgs/Point target_position
+
+# Priority level (0=normal, 1=high, 2=urgent)
+uint8 priority
+
+---
+
+# Response
+bool accepted
+
+# Mission ID for tracking
+string mission_id
+
+# Estimated time to delivery (seconds)
+float32 estimated_time
+
+# Error message if not accepted
+string error_message
