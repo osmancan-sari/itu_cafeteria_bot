@@ -6,7 +6,7 @@ from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch_ros.actions import Node
 from launch.substitutions import Command, LaunchConfiguration 
 
-def generate_launch_dexscription():
+def generate_launch_description():
     pkg_cafeteria_sim = get_package_share_directory('cafeteria_simulation')
     pkg_gazebo_ros = get_package_share_directory('gazebo_ros')
     pkg_turtlebot3_gazebo = get_package_share_directory('turtlebot3_gazebo')
@@ -32,6 +32,7 @@ def generate_launch_dexscription():
     )
 
     # 4. Robotu Spawn Etme (Fiziksel Robot)
+    """
     spawn_entity = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
             os.path.join(pkg_turtlebot3_gazebo, 'launch', 'spawn_turtlebot3.launch.py')
@@ -41,7 +42,7 @@ def generate_launch_dexscription():
             'y_pose': '0.0',
             'z_pose': '0.01'
         }.items()
-    )
+    )"""
 
     # 5. Robot State Publisher (Robotun Beyni)
     # DÜZELTME BURADA: Dosyayı 'xacro' komutuyla işleyerek okuyoruz.
@@ -57,8 +58,12 @@ def generate_launch_dexscription():
         }]
     )
 
+
+
+    
+
     return LaunchDescription([
         gazebo,
-        spawn_entity,
+        #spawn_entity,
         robot_state_publisher_node 
     ])

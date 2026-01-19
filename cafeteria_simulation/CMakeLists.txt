@@ -14,10 +14,9 @@ find_package(nav2_msgs REQUIRED)
 
 # Dosyaları kuruluma dahil et
 install(DIRECTORY
+  config
   launch
   worlds
-  models
-  config
   DESTINATION share/${PROJECT_NAME}
 )
 if(BUILD_TESTING)
