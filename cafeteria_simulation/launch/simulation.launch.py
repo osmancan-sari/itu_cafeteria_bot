@@ -75,6 +75,14 @@ def generate_launch_description():
 
     gazebo_params_file = os.path.join(get_package_share_directory("cafeteria_simulation"),'config','gazebo_params.yaml')
 
+    twist_mux_params = os.path.join(get_package_share_directory("cafeteria_simulation"),'config','twist_mux.yaml')
+    twist_mux = Node(
+            package="twist_mux",
+            executable="twist_mux",
+            parameters=[twist_mux_params],
+            remappings=[('/cmd_vel_out','/diff_cont/cmd_vel_unstamped')]
+        )
+
     spawn_entity = Node(
         package="gazebo_ros",
         executable="spawn_entity.py",
@@ -105,6 +113,7 @@ def generate_launch_description():
                 ),
             ),
             rsp,
+            twist_mux,
             OpaqueFunction(function=_make_gazebo_action, kwargs={"gazebo_params_file": gazebo_params_file}),
             spawn_entity,
             diff_drive_spawner,
