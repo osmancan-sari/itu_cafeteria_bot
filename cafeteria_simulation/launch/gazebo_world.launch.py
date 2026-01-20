@@ -32,6 +32,7 @@ def generate_launch_description():
     )
 
     # 4. Robotu Spawn Etme (Fiziksel Robot)
+    """
     spawn_entity = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
             os.path.join(pkg_turtlebot3_gazebo, 'launch', 'spawn_turtlebot3.launch.py')
@@ -41,7 +42,7 @@ def generate_launch_description():
             'y_pose': '0.0',
             'z_pose': '0.01'
         }.items()
-    )
+    )"""
 
     # 5. Robot State Publisher (Robotun Beyni)
     # DÜZELTME BURADA: Dosyayı 'xacro' komutuyla işleyerek okuyoruz.
@@ -57,8 +58,12 @@ def generate_launch_description():
         }]
     )
 
+
+
+    
+
     return LaunchDescription([
         gazebo,
-        spawn_entity,
+        #spawn_entity,
         robot_state_publisher_node 
     ])

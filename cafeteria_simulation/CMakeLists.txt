@@ -14,6 +14,7 @@ find_package(nav2_msgs REQUIRED)
 
 # Dosyaları kuruluma dahil et
 install(DIRECTORY
+  config
   launch
   worlds
   DESTINATION share/${PROJECT_NAME}
