@@ -286,20 +286,7 @@
     <origin xyz="0 0 0.3"/>
   </joint>
 
-  <!-- <link name="box">
-    <visual>
-      <geometry>
-        <box size="0.08 0.08 0.08"/>
-      </geometry>
-      <material name="white"/>
-    </visual>
-  </link>
 
-  <joint name="tobox" type="fixed">
-    <parent link="head"/>
-    <child link="box"/>
-    <origin xyz="0.1814 0 0.1414"/>
-  </joint> -->
 
 <link name="tray_pole">
   <visual>
