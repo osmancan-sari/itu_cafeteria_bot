@@ -1,6 +1,6 @@
 # ITU Cafeteria Bot
 
-A ROS2 Humble simulation of a TurtleBot3 robot navigating an ITU Medical Faculty cafeteria environment using Gazebo. Features an intelligent **Finite State Machine (FSM)** for autonomous food delivery with theft prevention and operator intervention capabilities.
+A ROS2 Humble simulation of a custom waiter robot navigating an ITU Medical Faculty cafeteria environment using Gazebo. Features an intelligent **Finite State Machine (FSM)** for autonomous food delivery with theft prevention and operator intervention capabilities.
 
 ## 🚀 Features
 
@@ -14,7 +14,7 @@ A ROS2 Humble simulation of a TurtleBot3 robot navigating an ITU Medical Faculty
 
 - **Docker Desktop** for Windows
 - **X Server** (VcXsrv or Xming) for GUI display
-- Docker image: `ros-gazebo:humble`
+- Docker image: `osrf/ros:humble-desktop`
 
 ## Quick Start
 
@@ -32,22 +32,29 @@ Inside the container:
 
 ```bash
 sudo apt update
-sudo apt install ros-humble-turtlebot3-gazebo ros-humble-turtlebot3-description ros-humble-nav2-msgs ros-humble-nav2-bringup -y
+sudo apt install \
+  ros-humble-nav2-msgs \
+  ros-humble-nav2-bringup \
+  ros-humble-gazebo-ros-pkgs \
+  ros-humble-gazebo-ros2-control \
+  ros-humble-ros2-control \
+  ros-humble-ros2-controllers \
+  ros-humble-twist-mux \
+  ros-humble-slam-toolbox -y
 ```
 
 ### 3. Build All Packages
 
 ```bash
 cd ~/itu_cafeteria_bot
-colcon build --packages-select cafeteria_interfaces cafeteria_robot_fsm cafeteria_simulation
+colcon build --packages-select waiter_robot_description cafeteria_interfaces cafeteria_robot_fsm cafeteria_simulation
 source install/setup.bash
 ```
 
 ### 4. Launch Gazebo Simulation
 
 ```bash
-export TURTLEBOT3_MODEL=burger
-ros2 launch cafeteria_simulation gazebo_world.launch.py
+ros2 launch cafeteria_robot_fsm master.launch.py
 ```
 
 ### 5. Run the Robot State Machine

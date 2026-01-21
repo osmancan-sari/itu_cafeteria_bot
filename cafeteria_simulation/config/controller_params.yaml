@@ -13,6 +13,9 @@ diff_cont:
   ros__parameters:
 
     publish_rate: 50.0
+    publish_odom: true
+    odom_topic: odom
+    enable_odom_tf: true
 
     base_frame_id: base_link
 

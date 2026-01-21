@@ -1,6 +1,6 @@
 services:
   ros-gazebo:
-    image: ros-gazebo:humble
+    image: osrf/ros:humble-desktop
     container_name: itu_cafeteria_bot
     network_mode: host
     environment:
