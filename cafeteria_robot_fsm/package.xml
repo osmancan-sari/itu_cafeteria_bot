@@ -18,6 +18,7 @@
   <depend>sensor_msgs</depend>
   <depend>nav2_msgs</depend>
   <depend>action_msgs</depend>
+  <depend>gazebo_msgs</depend>
   
   <!-- Our custom interfaces (will be created in Step 2) -->
   <depend>cafeteria_interfaces</depend>

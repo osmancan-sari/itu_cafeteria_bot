@@ -33,6 +33,11 @@ setup(
             # Operator control panel - interactive CLI for human operators:
             # ros2 run cafeteria_robot_fsm operator_panel
             'operator_panel = cafeteria_robot_fsm.operator_panel:main',
+            # Mock sensor nodes for local testing
+            'fsr_sensor_mock = cafeteria_robot_fsm.fsr_sensor_mock:main',
+            'collision_detection_mock = cafeteria_robot_fsm.collision_detection_mock:main',
+            # Collision detection node (bumper + optional IMU)
+            'collision_detection = cafeteria_robot_fsm.collision_detection:main',
         ],
     },
 )

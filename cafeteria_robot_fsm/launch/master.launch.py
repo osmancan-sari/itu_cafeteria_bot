@@ -4,7 +4,7 @@ Master Launch File for ITU Cafeteria Robot
 
 This launch file starts the complete robot system:
 1. Gazebo simulation with cafeteria world
-2. TurtleBot3 robot with sensors
+2. Waiter robot with sensors
 3. Nav2 navigation stack
 4. Robot State Machine (FSM brain)
 
@@ -28,6 +28,7 @@ from launch.actions import (
     IncludeLaunchDescription,
     TimerAction,
     LogInfo,
+    OpaqueFunction,
 )
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
@@ -41,26 +42,19 @@ def generate_launch_description():
     pkg_cafeteria_sim = get_package_share_directory('cafeteria_simulation')
     pkg_cafeteria_fsm = get_package_share_directory('cafeteria_robot_fsm')
     pkg_gazebo_ros = get_package_share_directory('gazebo_ros')
-    pkg_turtlebot3_gazebo = get_package_share_directory('turtlebot3_gazebo')
     pkg_nav2_bringup = get_package_share_directory('nav2_bringup')
+    pkg_waiter_robot = get_package_share_directory('waiter_robot_description')
     
     # ==================== LAUNCH ARGUMENTS ====================
     use_sim_time = LaunchConfiguration('use_sim_time', default='true')
-    
-    # TurtleBot3 model
-    turtlebot3_model = os.environ.get('TURTLEBOT3_MODEL', 'burger')
     
     # World file path
     world_file = os.path.join(
         pkg_cafeteria_sim, 'worlds', 'med_cafeteria_mapping.world'
     )
     
-    # URDF path
-    urdf_file = os.path.join(
-        get_package_share_directory('turtlebot3_description'),
-        'urdf',
-        f'turtlebot3_{turtlebot3_model}.urdf'
-    )
+    # Gazebo params file
+    gazebo_params_file = os.path.join(pkg_cafeteria_sim, 'config', 'gazebo_params.yaml')
     
     # ==================== DECLARE ARGUMENTS ====================
     declare_use_sim_time = DeclareLaunchArgument(
@@ -70,42 +64,99 @@ def generate_launch_description():
     )
     
     # ==================== 1. GAZEBO SIMULATION ====================
-    gazebo_launch = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(
-            os.path.join(pkg_gazebo_ros, 'launch', 'gazebo.launch.py')
-        ),
+    def _make_gazebo_action(context, *args, **kwargs):
+        gazebo_params_file = kwargs["gazebo_params_file"]
+        world_path = kwargs["world_path"]
+        
+        gazebo_launch = os.path.join(
+            get_package_share_directory("gazebo_ros"),
+            "launch",
+            "gazebo.launch.py",
+        )
+        
+        extra_args = "--ros-args --params-file " + gazebo_params_file
+        
+        return [
+            IncludeLaunchDescription(
+                PythonLaunchDescriptionSource(gazebo_launch),
+                launch_arguments={
+                    "world": world_path,
+                    "extra_gazebo_args": extra_args,
+                }.items(),
+            )
+        ]
+    
+    gazebo_launch = OpaqueFunction(
+        function=_make_gazebo_action,
+        kwargs={"gazebo_params_file": gazebo_params_file, "world_path": world_file}
+    )
+    
+    # ==================== 2. ROBOT STATE PUBLISHER ====================
+    robot_state_publisher = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource([
+            os.path.join(pkg_waiter_robot, 'launch', 'robot_state_publisher.launch.py')
+        ]),
         launch_arguments={
-            'world': world_file,
+            'use_sim_time': 'true',
+            'use_ros2_control': 'true'
         }.items()
     )
     
-    # ==================== 2. SPAWN ROBOT ====================
-    spawn_robot = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(
-            os.path.join(pkg_turtlebot3_gazebo, 'launch', 'spawn_turtlebot3.launch.py')
-        ),
-        launch_arguments={
-            'x_pose': '0.0',
-            'y_pose': '0.0',
-            'z_pose': '0.01',
-        }.items()
+    # ==================== 3. SPAWN ROBOT IN GAZEBO ====================
+    spawn_entity = Node(
+        package="gazebo_ros",
+        executable="spawn_entity.py",
+        arguments=["-topic", "robot_description", "-entity", "waiter_robot"],
+        output="screen",
     )
     
-    # ==================== 3. ROBOT STATE PUBLISHER ====================
-    from launch.substitutions import Command
+    # ==================== 4. CONTROLLER SPAWNERS ====================
+    diff_drive_spawner = Node(
+        package="controller_manager",
+        executable="spawner",
+        arguments=["diff_cont"],
+        output="screen",
+    )
     
-    robot_state_publisher = Node(
-        package='robot_state_publisher',
-        executable='robot_state_publisher',
-        name='robot_state_publisher',
+    joint_broad_spawner = Node(
+        package="controller_manager",
+        executable="spawner",
+        arguments=["joint_broad"],
+        output="screen",
+    )
+    
+    # ==================== 5. TWIST MUX ====================
+    twist_mux_params = os.path.join(pkg_cafeteria_sim, 'config', 'twist_mux.yaml')
+    twist_mux = Node(
+        package="twist_mux",
+        executable="twist_mux",
+        parameters=[twist_mux_params],
+        remappings=[('/cmd_vel_out', '/diff_cont/cmd_vel_unstamped')],
+        output="screen",
+    )
+
+    # ==================== 6. SENSOR NODES ====================
+    fsr_sensor_node = Node(
+        package='cafeteria_robot_fsm',
+        executable='fsr_sensor_mock',
+        name='fsr_sensor_mock',
         output='screen',
         parameters=[{
-            'robot_description': Command(['xacro ', urdf_file]),
             'use_sim_time': use_sim_time,
-        }]
+        }],
+    )
+
+    collision_detection_node = Node(
+        package='cafeteria_robot_fsm',
+        executable='collision_detection',
+        name='collision_detection',
+        output='screen',
+        parameters=[{
+            'use_sim_time': use_sim_time,
+        }],
     )
     
-    # ==================== 4. NAV2 NAVIGATION (Optional) ====================
+    # ==================== 7. NAV2 NAVIGATION (Optional) ====================
     # Note: Nav2 requires a map. If you don't have one, comment this out
     # and use SLAM instead to create one
     
@@ -119,7 +170,7 @@ def generate_launch_description():
     #     }.items()
     # )
     
-    # ==================== 5. ROBOT STATE MACHINE (FSM) ====================
+    # ==================== 8. ROBOT STATE MACHINE (FSM) ====================
     # Start FSM after a delay to allow Gazebo to initialize
     robot_fsm_node = TimerAction(
         period=5.0,  # Wait 5 seconds for Gazebo to start
@@ -158,14 +209,30 @@ def generate_launch_description():
         LogInfo(msg='📦 Starting Gazebo simulation...'),
         gazebo_launch,
         
-        # 2. Spawn the robot
-        LogInfo(msg='🤖 Spawning TurtleBot3...'),
-        spawn_robot,
-        
-        # 3. Robot state publisher
+        # 2. Robot state publisher (publishes robot_description topic)
+        LogInfo(msg='📡 Starting Robot State Publisher...'),
         robot_state_publisher,
         
-        # 4. Robot State Machine (delayed start)
+        # 3. Spawn the waiter robot in Gazebo
+        LogInfo(msg='🤖 Spawning Waiter Robot...'),
+        spawn_entity,
+        
+        # 4. Start controllers
+        LogInfo(msg='⚙️ Starting Controllers...'),
+        diff_drive_spawner,
+        joint_broad_spawner,
+        
+        # 5. Start twist mux
+        LogInfo(msg='🔀 Starting Twist Mux...'),
+        twist_mux,
+        
+        # 6. Sensor nodes
+        LogInfo(msg='🧪 Starting Sensor Nodes...'),
+        fsr_sensor_node,
+        collision_detection_node,
+
+        # 7. Robot State Machine (delayed start)
+        LogInfo(msg='🧠 Starting Robot State Machine in 5 seconds...'),
         robot_fsm_node,
         
         # 5. Final log
