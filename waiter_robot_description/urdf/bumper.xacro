@@ -34,7 +34,7 @@
     <always_on>true</always_on>
     <update_rate>10</update_rate>
     <contact>
-      <collision>bumper_link_collision</collision>
+      <collision>bumper_collision</collision>
     </contact>
 
     <plugin name="bumper_plugin" filename="libgazebo_ros_bumper.so">
