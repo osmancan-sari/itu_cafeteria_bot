@@ -44,6 +44,6 @@
       <bumperTopicName>contact</bumperTopicName>
       <frameName>bumper_link</frameName>
     </plugin>
-  </sensor>
-</gazebo>
+    </sensor>
+    </gazebo>
 </robot>

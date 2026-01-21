@@ -9,3 +9,7 @@ twist_mux:
         topic   : cmd_vel_teleop
         timeout : 0.5
         priority: 100
+      tracker:
+        topic   : cmd_vel_tracker
+        timeout : 0.5
+        priority: 10
