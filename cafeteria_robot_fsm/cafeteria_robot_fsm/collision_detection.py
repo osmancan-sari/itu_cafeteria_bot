@@ -43,8 +43,8 @@ class CollisionDetection(Node):
         if self.enable_imu:
             self.imu_sub = self.create_subscription(Imu, "/imu", self.imu_callback, 10)
 
-        self._last_contact_publish = 0.0
-        self._last_imu_publish = 0.0
+        self._last_contact_publish_ns = 0
+        self._last_imu_publish_ns = 0
 
         self.get_logger().info(
             "Collision detection started (bumper: /bumper/contact, imu enabled: %s)."
@@ -55,8 +55,9 @@ class CollisionDetection(Node):
         if not msg.states:
             return
 
-        now = self.get_clock().now().seconds_nanoseconds()[0]
-        if now - self._last_contact_publish < self.contact_cooldown_sec:
+        now_ns = self.get_clock().now().nanoseconds
+        cooldown_ns = int(self.contact_cooldown_sec * 1e9)
+        if now_ns - self._last_contact_publish_ns < cooldown_ns:
             return
 
         alert = CollisionAlert()
@@ -65,7 +66,7 @@ class CollisionDetection(Node):
         alert.severity = 50
         alert.stamp = self.get_clock().now().to_msg()
         self.publisher.publish(alert)
-        self._last_contact_publish = now
+        self._last_contact_publish_ns = now_ns
 
     def imu_callback(self, msg: Imu) -> None:
         accel = msg.linear_acceleration
@@ -74,8 +75,9 @@ class CollisionDetection(Node):
         if magnitude < self.imu_accel_threshold:
             return
 
-        now = self.get_clock().now().seconds_nanoseconds()[0]
-        if now - self._last_imu_publish < self.contact_cooldown_sec:
+        now_ns = self.get_clock().now().nanoseconds
+        cooldown_ns = int(self.contact_cooldown_sec * 1e9)
+        if now_ns - self._last_imu_publish_ns < cooldown_ns:
             return
 
         direction = Vector3(x=0.0, y=0.0, z=0.0)
@@ -92,7 +94,7 @@ class CollisionDetection(Node):
         alert.severity = min(100, int(magnitude * 10))
         alert.stamp = self.get_clock().now().to_msg()
         self.publisher.publish(alert)
-        self._last_imu_publish = now
+        self._last_imu_publish_ns = now_ns
 
 
 def main(args=None) -> None:
