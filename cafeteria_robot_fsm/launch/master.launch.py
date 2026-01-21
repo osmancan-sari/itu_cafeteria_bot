@@ -134,8 +134,29 @@ def generate_launch_description():
         remappings=[('/cmd_vel_out', '/diff_cont/cmd_vel_unstamped')],
         output="screen",
     )
+
+    # ==================== 6. SENSOR NODES ====================
+    fsr_sensor_node = Node(
+        package='cafeteria_robot_fsm',
+        executable='fsr_sensor_mock',
+        name='fsr_sensor_mock',
+        output='screen',
+        parameters=[{
+            'use_sim_time': use_sim_time,
+        }],
+    )
+
+    collision_detection_node = Node(
+        package='cafeteria_robot_fsm',
+        executable='collision_detection',
+        name='collision_detection',
+        output='screen',
+        parameters=[{
+            'use_sim_time': use_sim_time,
+        }],
+    )
     
-    # ==================== 6. NAV2 NAVIGATION (Optional) ====================
+    # ==================== 7. NAV2 NAVIGATION (Optional) ====================
     # Note: Nav2 requires a map. If you don't have one, comment this out
     # and use SLAM instead to create one
     
@@ -149,7 +170,7 @@ def generate_launch_description():
     #     }.items()
     # )
     
-    # ==================== 7. ROBOT STATE MACHINE (FSM) ====================
+    # ==================== 8. ROBOT STATE MACHINE (FSM) ====================
     # Start FSM after a delay to allow Gazebo to initialize
     robot_fsm_node = TimerAction(
         period=5.0,  # Wait 5 seconds for Gazebo to start
@@ -205,7 +226,12 @@ def generate_launch_description():
         LogInfo(msg='🔀 Starting Twist Mux...'),
         twist_mux,
         
-        # 6. Robot State Machine (delayed start)
+        # 6. Sensor nodes
+        LogInfo(msg='🧪 Starting Sensor Nodes...'),
+        fsr_sensor_node,
+        collision_detection_node,
+
+        # 7. Robot State Machine (delayed start)
         LogInfo(msg='🧠 Starting Robot State Machine in 5 seconds...'),
         robot_fsm_node,
         
