@@ -1,0 +1,24 @@
+detect_apriltag:
+  ros__parameters:
+    x_min: 0
+    x_max: 100
+    y_min: 40
+    y_max: 100
+
+    tag_family: "tag36h11"
+    quad_decimate: 1.0
+    min_decision_margin: 20.0
+
+detect_apriltag_3d:
+  ros__parameters:
+    tag_size: 0.6
+    camera_frame: "camera_link_optical"
+
+follow_apriltag:
+  ros__parameters:
+    rcv_timeout_secs: 1.0
+    angular_chase_multiplier: 1.2
+    forward_chase_speed: 0.15
+    search_angular_speed: 0.5
+    stop_distance_m: 0.6
+    filter_value: 0.9
